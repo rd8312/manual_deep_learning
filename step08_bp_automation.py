@@ -10,11 +10,14 @@ class Variable:
         self.creator = func
 
     def backward(self):
-        f = self.creator # 1. 取得函數
-        if f is not None:
-            x = f.input # 2. 取得函數的輸入
-            x.grad = f.backward(self.grad) # 3. 呼叫函數的backward方法
-            x.backward() # 呼叫上一個變數的backward方法 (遞迴)
+        funcs = [self.creator] 
+        while funcs:
+            f = funcs.pop() # 取得函數
+            x, y = f.input, f.output # 取得函數的輸出入
+            x.grad = f.backward(y.grad) # 呼叫backward方法
+
+            if x.creator is not None:
+                funcs.append(x.creator) # 在清單加入上一個函數
 
 class Function:
     def __call__(self, input):
